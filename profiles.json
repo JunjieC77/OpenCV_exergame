@@ -1,0 +1,7 @@
+{
+    "profiles": {
+        "player1": {"high_score": 100},
+        "player2": {"high_score": 50}
+
+    }
+}
