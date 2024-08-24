@@ -3,11 +3,12 @@ import mediapipe as mp
 import cv2
 import numpy as np
 import random
-from profile_manager import load_profiles, save_profiles, create_profile, delete_profile, select_profile
+from profile_manager import ProfileManager
 import time
 
 # Initialize Pygame
 pygame.init()
+profile_manager =ProfileManager()
 
 # Screen Dimensions
 WIDTH, HEIGHT = 1280, 720
@@ -70,10 +71,6 @@ resume_button_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 50, 300, 100)
 quit_button_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 + 60, 300, 100)
 back_button_rect = pygame.Rect(WIDTH - 180, 20, 160, 50)  # Back button
 
-# Profile management
-profiles = load_profiles()
-selected_profile_name = None
-selected_profile = None
 
 # Main Game Loop
 running = True
@@ -120,7 +117,7 @@ def handle_score_and_return_to_menu():
     # Compare current score with high score and update if needed
     if selected_profile and SCORE > selected_profile["high_score"]:
         selected_profile["high_score"] = SCORE
-        save_profiles(profiles)
+        profile_manager.save_profiles()
     # Return to menu
     state = "menu"
 
@@ -138,7 +135,7 @@ def handle_score_and_return_to_menu():
     global SCORE, selected_profile, profiles, state
     if selected_profile and SCORE > selected_profile["high_score"]:
         selected_profile["high_score"] = SCORE
-        save_profiles(profiles)
+        profile_manager.save_profiles()
     state = "menu"
 
 def handle_game_end():
@@ -180,7 +177,7 @@ while running:
                 elif quit_rect.collidepoint(mouse_x, mouse_y):
                     running = False
                 elif create_profile_button_rect.collidepoint(mouse_x, mouse_y):
-                    if len(profiles["profiles"]) < 8:
+                    if len(profile_manager.profiles["profiles"]) < 8:
                         state = "create"
                         refresh_create_screen = True  # Set flag to true to render screen on first entry
                     else:
@@ -198,8 +195,8 @@ while running:
             # Handle text input for creating a profile
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    if create_profile(profiles, input_text):
-                        save_profiles(profiles)
+                    if profile_manager.create_profile(input_text):
+                        profile_manager.save_profiles()
                     input_text = ""  # Reset input text
                     state = "menu"
                 elif event.key == pygame.K_BACKSPACE:
@@ -218,15 +215,15 @@ while running:
         elif state == "delete" or state == "select":
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = event.pos
-                for i, profile_name in enumerate(profiles["profiles"].keys()):
+                for i, profile_name in enumerate(profile_manager.profiles["profiles"].keys()):
                     profile_button_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 50 + i * 60, 300, 50)
                     if profile_button_rect.collidepoint(mouse_x, mouse_y):
                         if state == "delete":
-                            delete_profile(profiles, profile_name)
-                            save_profiles(profiles)
+                            profile_manager.delete_profile(profile_name)
+                            profile_manager.save_profiles()
                         else:
                             selected_profile_name = profile_name
-                            selected_profile = select_profile(profiles, selected_profile_name)
+                            selected_profile = profile_manager.select_profile(selected_profile_name)
                             reset_game()  # Reset the game state before starting
                             state = "game"
                         break
@@ -286,7 +283,7 @@ while running:
             menu_text = FONT.render("Select Profile", True, BLACK)
         window.blit(menu_text, menu_text.get_rect(center=(WIDTH // 2, HEIGHT // 4)))
 
-        for i, profile_name in enumerate(profiles["profiles"].keys()):
+        for i, profile_name in enumerate(profile_manager.profiles["profiles"].keys()):
             profile_button = FONT.render(profile_name, True, BLACK)
             profile_button_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 50 + i * 60, 300, 50)
             window.blit(profile_button, profile_button_rect)
@@ -300,7 +297,7 @@ while running:
         rankings_text = FONT.render("Score Rankings", True, BLACK)
         window.blit(rankings_text, rankings_text.get_rect(center=(WIDTH // 2, HEIGHT // 4)))
 
-        sorted_profiles = sorted(profiles["profiles"].items(), key=lambda item: item[1]["high_score"], reverse=True)
+        sorted_profiles = sorted(profile_manager.profiles["profiles"].items(), key=lambda item: item[1]["high_score"], reverse=True)
         for i, (profile_name, data) in enumerate(sorted_profiles):
             profile_rank_text = FONT.render(f"{profile_name}: {data['high_score']}", True, BLACK)
             window.blit(profile_rank_text, (WIDTH // 2 - 150, HEIGHT // 2 - 50 + i * 60))
