@@ -238,27 +238,13 @@ while running:
             menu_text = FONT.render("Select Profile", True, BLACK)
         window.blit(menu_text, menu_text.get_rect(center=(WIDTH // 2, HEIGHT // 4)))
 
-        for i, profile_name in enumerate(profile_manager.profiles["profiles"].keys()):
-            profile_button = FONT.render(profile_name, True, BLACK)
-            profile_button_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 50 + i * 60, 300, 50)
-            window.blit(profile_button, profile_button_rect)
+        UI_manager.render_select_and_delete_screen(profile_manager)
 
-        UI_manager.display_back_button()
-        pygame.display.update()
 
     elif state == "rankings":
-        # Render Rankings
-        window.fill(WHITE)
-        rankings_text = FONT.render("Score Rankings", True, BLACK)
-        window.blit(rankings_text, rankings_text.get_rect(center=(WIDTH // 2, HEIGHT // 4)))
-
-        sorted_profiles = sorted(profile_manager.profiles["profiles"].items(), key=lambda item: item[1]["high_score"], reverse=True)
-        for i, (profile_name, data) in enumerate(sorted_profiles):
-            profile_rank_text = FONT.render(f"{profile_name}: {data['high_score']}", True, BLACK)
-            window.blit(profile_rank_text, (WIDTH // 2 - 150, HEIGHT // 2 - 50 + i * 60))
-
-        UI_manager.display_back_button()
-        pygame.display.update()
+        # Render Rankings menu
+        UI_manager.render_ranking_screen(profile_manager)
+        #pygame.display.update()
 
     elif state == "game":
         if not game_paused:

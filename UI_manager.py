@@ -1,6 +1,7 @@
 import pygame
+#from profile_manager import ProfileManager
 WIDTH, HEIGHT = 1280, 720
-
+#profile_manager = ProfileManager()
 class UIManager:
     def __init__(self, window):
         self.WHITE = (255, 255, 255)
@@ -69,4 +70,26 @@ class UIManager:
         self.window.blit(delete_profile_button, self.delete_profile_button_rect)
         self.window.blit(rankings_button, self.rankings_button_rect)
 
+        pygame.display.update()
+
+    def render_select_and_delete_screen(self, profile_manager):
+        for i, profile_name in enumerate(profile_manager.profiles["profiles"].keys()):
+            profile_button = self.FONT.render(profile_name, True, self.BLACK)
+            profile_button_rect = pygame.Rect(WIDTH // 2 - 150, HEIGHT // 2 - 50 + i * 60, 300, 50)
+            self.window.blit(profile_button, profile_button_rect)
+
+        self.display_back_button()
+        pygame.display.update()
+
+    def render_ranking_screen(self, profile_manager):
+        self.window.fill(self.WHITE)
+        rankings_text = self.FONT.render("Score Rankings", True, self.BLACK)
+        self.window.blit(rankings_text, rankings_text.get_rect(center=(WIDTH // 2, HEIGHT // 4)))
+
+        sorted_profiles = sorted(profile_manager.profiles["profiles"].items(), key=lambda item: item[1]["high_score"], reverse=True)
+        for i, (profile_name, data) in enumerate(sorted_profiles):
+            profile_rank_text = self.FONT.render(f"{profile_name}: {data['high_score']}", True, self.BLACK)
+            self.window.blit(profile_rank_text, (WIDTH // 2 - 150, HEIGHT // 2 - 50 + i * 60))
+
+        self.display_back_button()
         pygame.display.update()
